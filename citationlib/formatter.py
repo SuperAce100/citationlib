@@ -324,43 +324,52 @@ class CitationFormatter:
         if not site_name:
             site_name = get_site_name(url)
         
-        # If we couldn't get the title, create one from the URL path
-        if not title:
-            path = urlparse(url).path.strip('/')
+        # If we couldn't get any metadata, create a URL-based citation
+        if not title and not authors:
+            # Parse URL to get domain and path
+            parsed = urlparse(url)
+            path = parsed.path.strip('/')
+            
+            # Create a title from the path
             if path:
-                # Convert URL path to title case, replace hyphens and underscores with spaces
-                title = ' '.join(word.capitalize() for word in re.split(r'[-_/]', path))
-            else:
+                title = path.split('/')[-1].replace('-', ' ').replace('_', ' ').title()
+            if not title:
                 title = site_name
         
-        # Get publication year
-        pub_year = current_year
+        # Format citation
+        if authors:
+            if len(authors) == 1:
+                author_text = f"{authors[0]['last_name']}, {authors[0]['first_name'][0]}."
+            elif len(authors) == 2:
+                author_text = f"{authors[0]['last_name']}, {authors[0]['first_name'][0]}. & {authors[1]['last_name']}, {authors[1]['first_name'][0]}."
+            else:
+                author_text = f"{authors[0]['last_name']}, {authors[0]['first_name'][0]}. et al."
+            citation_parts.append(author_text)
+        else:
+            citation_parts.append(site_name)
+        
+        # Add year
         if pub_date:
             try:
-                pub_datetime = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
-                pub_year = pub_datetime.year
-            except (ValueError, AttributeError):
-                pass
-        
-        # Format based on whether authors exist
-        author_text = format_author_list(authors) if authors else None
-        if author_text:
-            # Case 1: Authors exist - standard format
-            citation_parts.append(author_text)
-            citation_parts.append(f"({pub_year})")
-            if title:
-                citation_parts.append(title)
+                year = datetime.fromisoformat(pub_date.replace('Z', '+00:00')).year
+            except (ValueError, TypeError):
+                year = current_year
         else:
-            # Case 2: No authors - move title to first position
-            if title:
-                citation_parts.append(title)
-            citation_parts.append(f"({pub_year})")
+            year = current_year
+        citation_parts.append(f"({year})")
         
-        # Add site name
-        if site_name:
-            citation_parts.append(f"<i>{site_name}</i>")
+        # Add title
+        if title:
+            citation_parts.append(title)
         
-        # Add retrieval date and URL
-        citation_parts.append(f"Retrieved {datetime.now().strftime('%B %d, %Y')}, from {url}")
+        # Add site name if not already included
+        if authors and site_name:
+            citation_parts.append(site_name)
+        
+        # Add URL
+        citation_parts.append(url)
+        
+        # Add retrieval date
+        citation_parts.append(f"Retrieved {datetime.now().strftime('%B %-d, %Y')}")
         
         return ". ".join(citation_parts) 

@@ -33,7 +33,7 @@ pip install citationlib
 ## Quick Start
 
 ```python
-from citations import create_citation, Style, Format
+from citationlib import create_citation, Style, Format
 
 # Basic usage - defaults to APA style and plain text format
 citation = create_citation("https://doi.org/10.1038/s41586-021-03819-2")
@@ -69,7 +69,7 @@ print(bibtex_entry)
 The library supports three major citation styles:
 
 ```python
-from citations import Style
+from citationlib import create_citation, Style
 
 # APA (7th edition)
 apa_citation = create_citation(url, style=Style.APA)
@@ -86,9 +86,9 @@ chicago_citation = create_citation(url, style=Style.CHICAGO)
 Choose from five different output formats:
 
 ```python
-from citations import Format
+from citationlib import create_citation, Format
 
-# Plain text
+# Plain text (default)
 text_citation = create_citation(url, output_format=Format.PLAIN)
 
 # HTML
@@ -104,28 +104,34 @@ latex_citation = create_citation(url, output_format=Format.LATEX)
 bibtex_citation = create_citation(url, output_format=Format.BIBTEX)
 ```
 
-### Extracting Authors
+### Example with Different Sources
 
-You can extract author information separately:
+The library supports various types of academic sources:
 
 ```python
-from citations import extract_authors
+# Academic paper from Nature
+doi_citation = create_citation("https://doi.org/10.1038/s41586-021-03819-2")
 
-authors = extract_authors("https://doi.org/10.1038/s41586-021-03819-2")
-for author in authors:
-    print(f"{author.last_name}, {author.first_name}")
+# ArXiv preprint
+arxiv_citation = create_citation("https://arxiv.org/abs/1706.03762")
+
+# News article
+news_citation = create_citation("https://www.theguardian.com/us-news/2025/feb/09/democrats-aggressive-stand-against-trump")
+
+# Research website
+website_citation = create_citation("https://research.google/pubs/fairness-and-optimality-in-routing/")
 ```
 
 ## Error Handling
 
-The library uses custom exceptions for better error handling:
+The library provides proper error handling for various scenarios:
 
 ```python
-from citations import create_citation, CitationError
+from citationlib import create_citation
 
 try:
     citation = create_citation("https://example.com/invalid-paper")
-except CitationError as e:
+except Exception as e:
     print(f"Failed to create citation: {e}")
 ```
 

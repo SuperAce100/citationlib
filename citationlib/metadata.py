@@ -522,9 +522,25 @@ def parse_author_name(name: str) -> Optional[Dict[str, str]]:
             'first_name': first_name.strip(),
             'last_name': last_name.strip()
         }
-    else:  # First Last
+    else:  # First Last or other formats
         parts = name.strip().split()
         if len(parts) >= 2:
+            # Check for special cases like "in Washington" or "in New York"
+            if parts[0].lower() == 'in':
+                return None
+                
+            # Check for location indicators
+            location_indicators = ['in', 'at', 'from', 'for']
+            if any(word.lower() in location_indicators for word in parts):
+                return None
+                
+            # Handle multi-word last names
+            if len(parts) > 2 and parts[-2].lower() in ['van', 'von', 'de', 'del', 'della', 'der', 'den', 'da', 'dos']:
+                return {
+                    'first_name': ' '.join(parts[:-2]),
+                    'last_name': ' '.join(parts[-2:])
+                }
+            
             return {
                 'first_name': ' '.join(parts[:-1]),
                 'last_name': parts[-1]
@@ -568,27 +584,41 @@ def extract_author_from_json_ld_data(author_data: Any, authors: List[Dict[str, s
     if isinstance(author_data, list):
         for author in author_data:
             if isinstance(author, dict):
+                # Try different name fields
+                name = None
                 if 'name' in author:
-                    if cleaned_name := clean_author_name(author['name']):
-                        name_parts = parse_author_name(cleaned_name)
-                        if name_parts:
-                            authors.append(name_parts)
+                    name = author['name']
+                elif 'givenName' in author and 'familyName' in author:
+                    name = f"{author['givenName']} {author['familyName']}"
                 elif 'url' in author:
-                    if cleaned_name := clean_author_name(author['url']):
-                        name_parts = parse_author_name(cleaned_name)
-                        if name_parts:
-                            authors.append(name_parts)
+                    # Extract name from URL path
+                    path = urlparse(author['url']).path
+                    if path:
+                        name = path.split('/')[-1].replace('-', ' ')
+                
+                if name and (cleaned_name := clean_author_name(name)):
+                    name_parts = parse_author_name(cleaned_name)
+                    if name_parts:
+                        authors.append(name_parts)
+                        
     elif isinstance(author_data, dict):
+        # Try different name fields
+        name = None
         if 'name' in author_data:
-            if cleaned_name := clean_author_name(author_data['name']):
-                name_parts = parse_author_name(cleaned_name)
-                if name_parts:
-                    authors.append(name_parts)
+            name = author_data['name']
+        elif 'givenName' in author_data and 'familyName' in author_data:
+            name = f"{author_data['givenName']} {author_data['familyName']}"
         elif 'url' in author_data:
-            if cleaned_name := clean_author_name(author_data['url']):
-                name_parts = parse_author_name(cleaned_name)
-                if name_parts:
-                    authors.append(name_parts)
+            # Extract name from URL path
+            path = urlparse(author_data['url']).path
+            if path:
+                name = path.split('/')[-1].replace('-', ' ')
+        
+        if name and (cleaned_name := clean_author_name(name)):
+            name_parts = parse_author_name(cleaned_name)
+            if name_parts:
+                authors.append(name_parts)
+                
     elif isinstance(author_data, str):
         if cleaned_name := clean_author_name(author_data):
             name_parts = parse_author_name(cleaned_name)

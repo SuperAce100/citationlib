@@ -117,20 +117,23 @@ class APAStyle(CitationStyle):
     def format_citation(self, citation: Citation) -> str:
         parts = []
         
-        # Authors and year
+        # Authors and year or publisher/site name
         authors = self.format_authors(citation.authors)
         if authors:
-            parts.append(f"{authors}")
-            if citation.year:
-                parts.append(f"({citation.year})")
+            parts.append(authors)
+        elif citation.publisher:
+            parts.append(citation.publisher)
+            
+        if citation.year:
+            parts.append(f"({citation.year})")
         
-        # Title in sentence case
+        # Title
         if citation.title:
-            parts.append(sentence_case(citation.title))
+            parts.append(citation.title)
         
         # Journal info
         if citation.journal:
-            journal_parts = [citation.journal]
+            journal_parts = [f"<i>{citation.journal}</i>"]
             
             # Volume and issue
             if citation.volume:
@@ -145,11 +148,19 @@ class APAStyle(CitationStyle):
                 
             parts.append(", ".join(journal_parts))
         
-        # DOI or URL (without "Retrieved from" for stable URLs)
+        # Publisher if not used as author
+        if citation.publisher and authors:
+            parts.append(citation.publisher)
+        
+        # DOI or URL
         if citation.doi:
-            parts.append(clean_url(f"https://doi.org/{citation.doi}"))
+            parts.append(f"https://doi.org/{citation.doi}")
         elif citation.url:
-            parts.append(clean_url(citation.url))
+            parts.append(citation.url)
+        
+        # Access date for web resources
+        if citation.accessed_date and citation.url and not citation.doi:
+            parts.append(f"Retrieved {citation.accessed_date.strftime('%B %-d, %Y')}")
         
         return ". ".join(p for p in parts if p) + "."
 
@@ -171,10 +182,12 @@ class MLAStyle(CitationStyle):
     def format_citation(self, citation: Citation) -> str:
         parts = []
         
-        # Authors
+        # Authors or publisher/site name
         authors = self.format_authors(citation.authors)
         if authors:
             parts.append(authors)
+        elif citation.publisher:
+            parts.append(citation.publisher)
         
         # Title
         if citation.title:
@@ -182,7 +195,7 @@ class MLAStyle(CitationStyle):
         
         # Container (journal, etc.)
         if citation.journal:
-            parts.append(citation.journal)
+            parts.append(f"<i>{citation.journal}</i>")
             
         # Publication details
         pub_details = []
@@ -199,11 +212,15 @@ class MLAStyle(CitationStyle):
         if citation.pages:
             parts.append(f"pp. {citation.pages}")
             
+        # Publisher if not used as author
+        if citation.publisher and authors:
+            parts.append(citation.publisher)
+            
         # DOI or URL
         if citation.doi:
-            parts.append(clean_url(f"https://doi.org/{citation.doi}"))
+            parts.append(f"https://doi.org/{citation.doi}")
         elif citation.url:
-            parts.append(clean_url(citation.url))
+            parts.append(citation.url)
         
         return ", ".join(p for p in parts if p) + "."
 
@@ -223,10 +240,12 @@ class ChicagoStyle(CitationStyle):
     def format_citation(self, citation: Citation) -> str:
         parts = []
         
-        # Authors
+        # Authors or publisher/site name
         authors = self.format_authors(citation.authors)
         if authors:
             parts.append(authors)
+        elif citation.publisher:
+            parts.append(citation.publisher)
         
         # Title
         if citation.title:
@@ -234,7 +253,7 @@ class ChicagoStyle(CitationStyle):
         
         # Journal info
         if citation.journal:
-            journal_info = [citation.journal]
+            journal_info = [f"<i>{citation.journal}</i>"]
             if citation.volume:
                 journal_info.append(citation.volume)
             if citation.issue:
@@ -250,10 +269,14 @@ class ChicagoStyle(CitationStyle):
         if pub_info:
             parts.append("".join(pub_info))
         
+        # Publisher if not used as author
+        if citation.publisher and authors:
+            parts.append(citation.publisher)
+            
         # DOI or URL
         if citation.doi:
-            parts.append(clean_url(f"https://doi.org/{citation.doi}"))
+            parts.append(f"https://doi.org/{citation.doi}")
         elif citation.url:
-            parts.append(clean_url(citation.url))
+            parts.append(citation.url)
         
         return ". ".join(p for p in parts if p) + "." 

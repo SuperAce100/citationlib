@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "citationlib"
-version = "0.1.0"
+version = "0.2.1"
 authors = [
     { name = "Asanshay Gupta" },
 ]
@@ -17,9 +17,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "habanero>=1.2.3",
-    "arxiv>=2.0.0",
-    "requests>=2.31.0",
+    "sgmllib3k==1.0.0",
+    "habanero>=1.2.6",
+    "arxiv>=1.4.7",
+    "requests>=2.0.0",
     "beautifulsoup4>=4.12.0",
     "typing-extensions>=4.5.0",
 ]
@@ -29,4 +30,4 @@ dependencies = [
 "Bug Tracker" = "https://github.com/SuperAce100/citationlib/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"] 
+packages = ["citationlib"] 

@@ -22,6 +22,7 @@ from .exceptions import (
     WebpageError,
     AuthorExtractionError
 )
+from .types import Citation, Style
 
 def clean_doi(doi: str) -> str:
     """Clean and validate a DOI string.
@@ -254,4 +255,34 @@ def extract_authors(identifier: str) -> List[str]:
         metadata = formatter.extract_webpage_metadata(soup, identifier)
         return metadata['authors']
     except Exception as e:
-        raise AuthorExtractionError(f"Error extracting webpage authors: {str(e)}") 
+        raise AuthorExtractionError(f"Error extracting webpage authors: {str(e)}")
+
+def create_url_citation(url: str, style: Style) -> Citation:
+    """Create a citation from just the URL when metadata extraction fails.
+    
+    Args:
+        url: The URL to create a citation for
+        style: The citation style to use
+        
+    Returns:
+        Citation: A Citation object with basic information extracted from the URL
+    """
+    # Parse URL to get domain and path
+    parsed = urlparse(url)
+    domain = parsed.netloc.replace('www.', '')
+    path = parsed.path.strip('/')
+    
+    # Create a title from the path
+    title = path.split('/')[-1].replace('-', ' ').replace('_', ' ').title()
+    if not title:
+        title = domain
+    
+    # Create citation with minimal information
+    return Citation(
+        authors=[],  # No authors available
+        title=title,
+        year=datetime.now().year,  # Current year as access year
+        url=url,
+        accessed_date=datetime.now(),
+        publisher=domain.split('.')[0].title()  # Use domain as publisher
+    ) 

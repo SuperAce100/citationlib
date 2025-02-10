@@ -70,23 +70,25 @@ METADATA_SELECTORS = {
         ("meta", {"name": "title"}),
         ("meta", {"name": "citation_title"}),
         ("meta", {"name": "dc.title"}),
-        ("h1", {"class": ["article-title", "entry-title", "title", "heading-title", "article-header__title"]}),
+        ("h1", {"class": ["article-title", "entry-title", "title", "heading-title", "article-header__title", "dcr-y70mar"]}),
         ("h1", {}),
         ("title", {})
     ],
     "author": [
-        ("meta", {"itemprop": "author"}),
         ("meta", {"property": "article:author"}),
         ("meta", {"name": "author"}),
         ("meta", {"name": "citation_author"}),
         ("meta", {"name": "dc.creator"}),
-        ("span", {"class": ["author", "byline", "writer", "contributor", "article__author-name"]}),
-        ("div", {"class": ["author", "byline", "writer", "contributor", "article__author-name"]}),
-        ("a", {"class": ["author", "byline", "writer", "contributor", "article__author-name"]}),
+        ("meta", {"property": "article:author"}),
         ("a", {"rel": "author"}),
+        ("span", {"class": ["author", "byline", "writer", "contributor", "article__author-name", "dcr-12u8v8q"]}),
+        ("div", {"class": ["author", "byline", "writer", "contributor", "article__author-name", "dcr-12u8v8q"]}),
+        ("a", {"class": ["author", "byline", "writer", "contributor", "article__author-name", "dcr-12u8v8q"]}),
         ("ul", {"class": ["authors-list", "author-list", "contributors", "article__author-list"]}),
         ("div", {"class": "authors-list"}),
-        ("span", {"class": "authors-list-item"})
+        ("span", {"class": "authors-list-item"}),
+        ("address", {"aria-label": "Contributor info"}),
+        ("div", {"data-gu-name": "byline"})
     ],
     "date": [
         ("meta", {"property": "article:published_time"}),
